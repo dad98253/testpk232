@@ -687,11 +687,11 @@ int unpacket (char * buff, int size) {
 		// moves shifted ascii into calllist array
 //		printf("i,buff[1],buff[i]= %i, %02x, %02x\n",i,(unsigned char)*(buff+1),(unsigned char)*(buff+i));
 //		printf("i-7+1,buff[i-7+1],&shifted..=%i,%02x,%02x\n",i-7+1,(unsigned char)(*(buff+i-7+1)),(unsigned char)(*(buff+i-7+1))>>1);
-		for (j=0;j<6;j++) calllist[numcalls][j] = (unsigned char)(*(buff+i-7+j+1)) >> 1;
+		for (j=0;j<6;j++) calllist[numcalls][j] = (unsigned char)(*(buff+i-6+j)) >> 1;
 		calllist[numcalls][6] = '\000'; // set the last byte to zero so we can use it as a string
 		strip_trailing_blanks(&(calllist[numcalls][0]));
-		uids[numcalls] = (*(buff+i-1) >> 1) & '\x0f';
-		if ( (*(buff+i-1) >> 7) & 1 ) {
+		uids[numcalls] = (*(buff+i) >> 1) & '\x0f';
+		if ( (*(buff+i) >> 7) & 1 ) {
 			commandbits[numcalls] = '*';
 		} else {
 			commandbits[numcalls] = ' ';

@@ -9,7 +9,7 @@ With all of the hurt that this caused me, I figured I'd post this out there just
 
 Some of the code is semi-lifted from the linux mkiss driver (I wanted to make sure that it was de-encapsulating the PK232’s KISS data properly). So, those subroutines my require a GPL license. But, the rest is DWTFYWWI. 
 
-Note that the code uses the appf2 library to do some housekeeping tasks. You can find a copy of the library here :  
+Note that the code uses the appf2 library to do some housekeeping tasks. You can find a copy of the library here :  [Click here](https://github.com/dad98253/libappf.git)
 
 What I found that the most useful feature, was the hex/ascii/shifted ascii dump mode. It's similar to the "TRACE" output on the PK232.
 

@@ -705,8 +705,8 @@ int unpacket (char * buff, int size) {
 	if ( numcalls > 2) {
 		printf(" relay via ");
 		for (j=2;j<numcalls;j++) printf(" %s-%u%c",(char*)calllist[j], uids[j], commandbits[j]);
-		printf("\n");
 	}
+	printf("\n");
 	// decode the control byte
 	pollbit = ( ( (*(buff+i)) >> 4 ) & 1);
 	switch (*(buff+i) & 3) {

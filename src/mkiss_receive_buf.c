@@ -24,6 +24,7 @@ struct mkiss axstruct;
 struct mkiss *ax = &axstruct;
 
 extern af_daemon_t mydaemon;
+extern int setraw;
 
 static void kiss_unesc(struct mkiss *ax, unsigned char s);
 static void ax_bump(struct mkiss *ax);
@@ -80,32 +81,41 @@ void mkiss_receive_buf(struct tty_struct *tty, const char *cp, const char *fp, i
 static void kiss_unesc(struct mkiss *ax, unsigned char s)
 {
 	if ( mydaemon.log_level > LOG_WARNING ) printf("X");
-	switch (s) {
-	case END:
-		if ( mydaemon.log_level > LOG_WARNING ) printf("END,test_and_clear_bit = %i, rcount = %i, buffsize = %i\n",!test_and_clear_bit(AXF_ERROR, &ax->flags),ax->rcount,ax->buffsize);
-		/* drop keeptest bit = VSV */
-		if (test_bit(AXF_KEEPTEST, &ax->flags))
-			clear_bit(AXF_KEEPTEST, &ax->flags);
-
-		if (!test_and_clear_bit(AXF_ERROR, &ax->flags) && (ax->rcount > 2)) {
-			ax_bump(ax);
+	if ( setraw ) {
+		if ( s == END ) {
+			if (ax->rcount > 2) {
+				ax_bump(ax);
+				ax->rcount = 0;
+			}
 		}
+	} else {
+		switch (s) {
+		case END:
+			if ( mydaemon.log_level > LOG_WARNING ) printf("END,test_and_clear_bit = %i, rcount = %i, buffsize = %i\n",!test_and_clear_bit(AXF_ERROR, &ax->flags),ax->rcount,ax->buffsize);
+			/* drop keeptest bit = VSV */
+			if (test_bit(AXF_KEEPTEST, &ax->flags))
+				clear_bit(AXF_KEEPTEST, &ax->flags);
 
-		clear_bit(AXF_ESCAPE, &ax->flags);
-		ax->rcount = 0;
-		return;
+			if (!test_and_clear_bit(AXF_ERROR, &ax->flags) && (ax->rcount > 2)) {
+				ax_bump(ax);
+			}
 
-	case ESC:
-		set_bit(AXF_ESCAPE, &ax->flags);
-		return;
-	case ESC_ESC:
-		if (test_and_clear_bit(AXF_ESCAPE, &ax->flags))
-			s = ESC;
-		break;
-	case ESC_END:
-		if (test_and_clear_bit(AXF_ESCAPE, &ax->flags))
-			s = END;
-		break;
+			clear_bit(AXF_ESCAPE, &ax->flags);
+			ax->rcount = 0;
+			return;
+
+		case ESC:
+			set_bit(AXF_ESCAPE, &ax->flags);
+			return;
+		case ESC_ESC:
+			if (test_and_clear_bit(AXF_ESCAPE, &ax->flags))
+				s = ESC;
+			break;
+		case ESC_END:
+			if (test_and_clear_bit(AXF_ESCAPE, &ax->flags))
+				s = END;
+			break;
+		}
 	}
 
 //	spin_lock_bh(&ax->buflock);
@@ -132,22 +142,24 @@ static void ax_bump(struct mkiss *ax)
 //	int count;
 
 //	spin_lock_bh(&ax->buflock);
-	if (ax->rbuff[0] > 0x0f) {
-		if (ax->rbuff[0] & 0x80) {
-			if ( mydaemon.log_level > LOG_WARNING ) fprintf(stderr,"rbuff[0] & 0x80 true\n");
-			ax->rcount -= 2;
-			*ax->rbuff &= ~0x80;
-		} else if (ax->rbuff[0] & 0x20)  {
-			if ( mydaemon.log_level > LOG_WARNING ) fprintf(stderr,"rbuff[0] & 0x20 true\n");
-			ax->rcount -= 2;
+	if ( !setraw ) {
+		if (ax->rbuff[0] > 0x0f) {
+			if (ax->rbuff[0] & 0x80) {
+				if ( mydaemon.log_level > LOG_WARNING ) fprintf(stderr,"rbuff[0] & 0x80 true\n");
+				ax->rcount -= 2;
+				*ax->rbuff &= ~0x80;
+			} else if (ax->rbuff[0] & 0x20)  {
+				if ( mydaemon.log_level > LOG_WARNING ) fprintf(stderr,"rbuff[0] & 0x20 true\n");
+				ax->rcount -= 2;
 
-			/*
-			 * dl9sau bugfix: the trailling two bytes flexnet crc
-			 * will not be passed to the kernel. thus we have to
-			 * correct the kissparm signature, because it indicates
-			 * a crc but there's none
-			 */
-			*ax->rbuff &= ~0x20;
+				/*
+				 * dl9sau bugfix: the trailling two bytes flexnet crc
+				 * will not be passed to the kernel. thus we have to
+				 * correct the kissparm signature, because it indicates
+				 * a crc but there's none
+				 */
+				*ax->rbuff &= ~0x20;
+			}
 		}
 	}
 

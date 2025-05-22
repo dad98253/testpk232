@@ -47,6 +47,7 @@ af_daemon_t mydaemon;
 int setkiss = 0;
 int interpretkiss = 0;
 int printnum = 1;
+int setraw = 0;
 
 extern int termios( int fd);
 extern void mkiss_receive_buf(struct tty_struct *tty, const char *cp, const char *fp, int count);
@@ -68,6 +69,7 @@ void testpk232_usage( )
 	printf(" -m    = set log mask (0xfffffff0)\n" );
 	printf(" -n    = set application name\n" );
 	printf(" -k    = set kiss mode on\n" );
+	printf(" -r    = dump raw kiss data (else output de-encapulated)\n" );
 	exit(0);
 }
 
@@ -359,7 +361,7 @@ int main( int argc, char **argv ) {
 	}
 
     /* read command line options */
-    	while ((ca = getopt(argc, argv, "hvfsko:l:m:n:")) != -1)
+    	while ((ca = getopt(argc, argv, "hvfskro:l:m:n:")) != -1)
     	{
     		switch (ca)
     		{
@@ -403,6 +405,11 @@ int main( int argc, char **argv ) {
     		case 'k':
     			setkiss = 1;
     			fprintf(stderr,"Using KISS mode\n");
+    			break;
+
+    		case 'r':
+    			setraw = 1;
+    			fprintf(stderr,"Dump in raw KISS mode\n");
     			break;
 
     		case 'h':

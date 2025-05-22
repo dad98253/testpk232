@@ -686,7 +686,7 @@ int unpacket (char * buff, int size) {
 	if (size < 14) return (1);
 	// (first byte is always zero, ie, buff[0]==0)
 	if ( *buff ) {
-		printf("Therte is garbage in the first byte of the message. We will not attempt decoding...\n");
+		printf("There is garbage in the first byte of the message. We will not attempt decoding...\n");
 		return(2);
 	}
 	// find last call

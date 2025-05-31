@@ -46,3 +46,27 @@ Supervisory frame (Receive Ready) with poll bit = 0, rec seq. no. = 7
 content = =4827.63N/12322.66Wv0-1/000/A=000121[:VE7SEV
 ############################################################################
 ```
+Postscript:
+After all of the pain to figure out the RTS problem, linux ax25 still would not work with my old Packrat. For some unknown reason, I had to use both the mkiss app AND the kissattach app to get it to finally work. So, if your Packrat firmware is dated 1993, here is what you need to do:
+
+1) Snip your RTS line and hard wire RTS at the Packrat end to +14V (or whatever "high" is on your serial line).
+2) Use mkiss to create a pseudo tty port. On my machine, the Packrat is /dev/ttyMP6, so:
+...
+/usr/sbin/mkiss -l -h -s 9600 /dev/ttyMP6 /dev/ptmx
+...
+3) Note the output from mkiss, it will tell you what the name of your pseudo terminal is. For example, my output is:
+...
+Awaiting client connects on:
+/dev/pts/6
+...
+4) Use kissattach to connect ax25 to the pseudo terminal. In my axports file, I have named my port “Dxc”, so:
+...
+/usr/sbin/kissattach /dev/pts/6 Dxc
+...
+(In my case, I also specify an ip address at the end of the kissattach command. But, that shouldn’t be necessary. The above command is untested, but should work…)
+5) Use ifconfig or the ip command to verify that the ax25 port was created (it will probably be called ax0)
+6) If you plan to monitor traffic using axlisten or wireshark, you may need to also put the ax25 port into promiscuous mode:
+...
+ip link set ax0 promisc on
+...
+(obviously this is not recommended if your ax25 port is on a public network)

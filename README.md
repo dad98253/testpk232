@@ -51,22 +51,23 @@ After all of the pain to figure out the RTS problem, linux ax25 still would not 
 
 1) Snip your RTS line and hard wire RTS at the Packrat end to +14V (or whatever "high" is on your serial line).
 2) Use mkiss to create a pseudo tty port. On my machine, the Packrat is /dev/ttyMP6, so:
-...
+```
 /usr/sbin/mkiss -l -h -s 9600 /dev/ttyMP6 /dev/ptmx
-...
+```
 3) Note the output from mkiss, it will tell you what the name of your pseudo terminal is. For example, my output is:
-...
+```
 Awaiting client connects on:
 /dev/pts/6
-...
+```
 4) Use kissattach to connect ax25 to the pseudo terminal. In my axports file, I have named my port “Dxc”, so:
-...
+```
 /usr/sbin/kissattach /dev/pts/6 Dxc
-...
+```
 (In my case, I also specify an ip address at the end of the kissattach command. But, that shouldn’t be necessary. The above command is untested, but should work…)
+
 5) Use ifconfig or the ip command to verify that the ax25 port was created (it will probably be called ax0)
 6) If you plan to monitor traffic using axlisten or wireshark, you may need to also put the ax25 port into promiscuous mode:
-...
+```
 ip link set ax0 promisc on
-...
+```
 (obviously this is not recommended if your ax25 port is on a public network)
